@@ -69,7 +69,7 @@ function commands_init()
 						if(command.vars[i][1] == "name") then
 							local c = clientWithName(vars[i])
 							if(c == nil) then
-								net_send(client.uid,"message","Error: '"..vars[i].."' not found in clients.")
+								net_send(client.uid,"message","Error: "..vars[i].." not found in clients.")
 								net_send(client.uid,"message",command:helpStr())
 								return
 							else
@@ -1212,26 +1212,7 @@ function commands_init()
    				--net_send("","chat",json.encode({uid=c.uid,color=c.color,value="<"..nameStr(c).."> "..str}))
         end)
         
-        com:makeCommand("/say",{{"name",true},{"string",true}},3,
-		"Type as another user.",
-		function(client,vars)
-				local c = vars[1]
-				if(client.adminLevel >= c.adminLevel) then
-   				local str = ""
-   				for i,var in pairs(vars) do
-   					if(i > 1) then
-   						if(var ~= nil) then
-   							str = str..var.." "
-   			
-   						end
-   					end
-   				end
-   				GAME.modules.clients:event({type="net:message",uid=c.uid,value=str})
-   				else
-   					net_send(client.uid,"message","You need to be a higher admin level to do that!")
-   				end
-   				--net_send("","chat",json.encode({uid=c.uid,color=c.color,value="<"..nameStr(c).."> "..str}))
-        end)
+       
         
         
           com:makeCommand("/say",{{"name",true},{"string",true}},3,
@@ -1395,7 +1376,7 @@ function commands_init()
 		"Toggles mute on a player.",
 		function(client,vars)
    			local c = vars[1]
-   			if(client.adminLevel > c.adminLevel) then
+   			if(client.adminLevel >= c.adminLevel) then
    				if(c.muted > 0) then
    					c.muted = 0
    					net_send("","message",nameStr(c).." got unmuted.")

@@ -1,7 +1,7 @@
 function config_init()
 	GAME.config = {
 		roomName = "Maccoland",
-		version = "0.97",
+		version = "1.0",
 		port = "23099",
 		
 		--seconds of inactivity required for auto-afk
@@ -28,7 +28,7 @@ function config_init()
 		
 		
 		-- Server will be hidden on startup if set to true. Type /hide to toggle hide.
-		hideOnStart = true,
+		hideOnStart = false,
 		
 		-- Available modes in this server. Leave empty to make all available.
 		-- Note: Some modes might not be as robust as others, and may lag your server.
@@ -37,7 +37,7 @@ function config_init()
 		
 		
 		--Set topic to empty string "" to hide it
-		topic = ""
+		topic = "I love macco <3"
 		
 		--//////END NEW IN 0.97 ///////////
 	

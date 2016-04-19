@@ -15,6 +15,12 @@ You can google "port forwarding tutorial" if you don't know how to do that.
 
 
 == CHANGELOG ==
+> 19.April.2016 - Maccoland v1.0
+- fixed a few bugs
+- uploaded on github
+- people now have ranks instead of goats, yay!
+
+
 > 21.June.2015 - Maccoland v0.97
 - New stuff
 - New ZAP mode [NEW VERSION]

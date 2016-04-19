@@ -323,7 +323,7 @@ local function playerlist(client)
 			wins=v.wins;
 		
 			icon='icon-'..(v.adminLevel == 2 and'admin-alt2'or (v.adminLevel >= 2) and'admin'or v.status);
-			rankbox = v.goat == true and substitute([[
+			rankbox = v.goat == false and substitute([[
 			<td width=$width>
 			<input type='button'width=$width height=40  onclick=''class='icon1'>
 					<rank value='$rank'width=$rw height=$rh>
