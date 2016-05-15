@@ -31,7 +31,8 @@ mode:addPreset("default","Nothing special.",
 	startships = {100},
 	startprod = {100},
 	width = {600},
-	height = {400}
+	height = {400},
+	revolt = {0},
 })
 
 
@@ -43,7 +44,8 @@ mode:addPreset("tiny","Four planets are enough bruh.",
 	startships = {100},
 	startprod = {100},
 	width = {450},
-	height = {300}
+	height = {300},
+	revolt = {0},
 })
 
 mode:addPreset("small","Nice and cozy map.",
@@ -55,6 +57,7 @@ mode:addPreset("small","Nice and cozy map.",
 	startprod = {100},
 	width = {600},
 	height = {400},
+	revolt = {0},
 })
 
 mode:addPreset("medium","One menu medium please.",
@@ -66,6 +69,7 @@ mode:addPreset("medium","One menu medium please.",
 	startprod = {100},
 	width = {700},
 	height = {450},
+	revolt = {0},
 })
 
 
@@ -78,6 +82,7 @@ mode:addPreset("large","For the big boys.",
 	startprod = {100},
 	width = {900},
 	height = {550},
+	revolt = {0},
 })
 
 mode:addPreset("huge","The bigger the better.",
@@ -89,6 +94,7 @@ mode:addPreset("huge","The bigger the better.",
 	startprod = {100},
 	width = {1100},
 	height = {750},
+	revolt = {0},
 })
 
 mode:addPreset("spacey","I feel the distance.",
@@ -100,6 +106,7 @@ mode:addPreset("spacey","I feel the distance.",
 	startprod = {100},
 	width = {1100},
 	height = {750},
+	revolt = {0},
 })
 
 mode:addPreset("waffle","Blame waffles for this.",
@@ -111,6 +118,7 @@ mode:addPreset("waffle","Blame waffles for this.",
 	startprod = {100},
 	width = {600},
 	height = {400},
+	revolt = {0},
 })
 
 mode:addPreset("1prod","Wait for the prod to hit!",
@@ -122,6 +130,7 @@ mode:addPreset("1prod","Wait for the prod to hit!",
 	startprod = {1},
 	width = {600},
 	height = {400},
+	revolt = {0},
 })
 
 mode:addPreset("million","Look at me, I'm a millionaire!",
@@ -133,6 +142,7 @@ mode:addPreset("million","Look at me, I'm a millionaire!",
 	startprod = {200},
 	width = {600},
 	height = {400},
+	revolt = {0},
 })
 
 
@@ -145,6 +155,7 @@ mode:addPreset("fatty","500 prod doesn't mean I'm fat!",
 	startprod = {500},
 	width = {2000},
 	height = {1400},
+	revolt = {0},
 })
 
 mode:addPreset("strip","Thinner than a hair.",
@@ -156,6 +167,7 @@ mode:addPreset("strip","Thinner than a hair.",
 	startprod = {100},
 	width = {1200},
 	height = {1},
+	revolt = {0},
 })
 
 
@@ -174,7 +186,7 @@ mode:addPreset("strip","Thinner than a hair.",
 -- Please do not use conflicting names
 -- Input values will always be numbers and cant be nil
 mode.settings = shallowCopy(mode.presets[mode.currentPreset].settings)
-
+mode.settings["revolt"] = {0}
 ---------------------------------------------------------------------------
 --LIMIT SETTINGS VALUES
 ---------------------------------------------------------------------------
@@ -185,6 +197,11 @@ mode.limitValues = function()
 
 --local settings = GAME.mode.modeList[GAME.mode.current].settings
 local settings = mode.settings
+if(settings["revolt"][1] > 10) then
+	settings["revolt"][1] = 10
+elseif(settings["revolt"][1] < 0) then
+	settings["revolt"][1] = 0
+end
 
 if(settings["neutrals"][2] > 1000) then
 	settings["neutrals"][2] = 1000
@@ -227,6 +244,16 @@ local data = {}
 data.winTime = 5
 data.winT = data.winTime
 data.users = users
+data.t = 0
+data.revoltChance = ((10-(mode.settings["revolt"][1]))/2)+1
+if(mode.settings["revolt"][1] == 0) then
+	data.revoltTime = 99999999999
+else
+	data.revoltTime = 3
+end
+data.revoltMaxTime = ((10-mode.settings["revolt"][1])+1)*10
+data.lastTotalShips = totalShips(users)
+data.checkT = 0
 
 mode.data = data
 
@@ -235,6 +262,7 @@ mode.data = data
 local settings = mode.settings
 local sw = settings["width"][1]
 local sh = settings["height"][1]
+
 
 
 
@@ -274,6 +302,8 @@ end
     end
 
     g2.planets_settle(0,0,GAME.sw,GAME.sh)	
+    data.lastTotalShips = totalShips(users)
+
 
 end
 
@@ -288,11 +318,72 @@ mode.loop = function(t)
 	if(data == nil) then
 		local data = {}
 		data.winTime = 5
+		data.t = 0
+		data.revoltTime = 3
 		data.winT = data.winTime
 		data.users = g2.search("user")
 		mode.data = data
 		return
 	end
+
+	data.t = data.t+t
+	data.checkT = data.checkT+t
+	
+	if(data.checkT > 30) then
+		local currentTotalShips = totalShips(data.users)
+
+		data.checkT = 0;
+		
+		data.lastTotalShips = currentTotalShips
+		
+	end
+	if(data.t > data.revoltTime) then
+	
+		local currentTotalShips = totalShips(data.users)
+		data.revoltTime = math.random(data.revoltMaxTime-5,data.revoltMaxTime+5)
+		data.t = 0
+		if(data.lastTotalShips < currentTotalShips) then
+
+		
+		
+	
+		local mostShipsUser = find("user",
+		function(u)
+			local value = numShips(u)
+			if(u == GAME.game.neutral) then
+				value = value-10000000000
+			end
+			return value
+		end)
+		
+		local planets = g2.search("planet owner:"..mostShipsUser.n)
+		local fleets = g2.search("fleet owner:"..mostShipsUser.n)
+
+		for i,p in ipairs(planets) do
+			if(math.random(0,data.revoltChance) == 0) then
+				local userList = {}
+				for j,u in pairs(data.users) do
+					userList[#userList+1] = u
+				end
+				local randUser = userList[math.random(1,#userList)]
+				
+				p:planet_chown(randUser)
+				net_send("","message","Booooom!")
+			end
+		end
+		
+		for i,f in ipairs(fleets) do
+			if(math.random(0,data.revoltChance) == 0) then
+				f:destroy()
+				net_send("","message","Booooom!")
+
+			end
+		end
+end
+		
+	end
+
+
 
 	--Finds the winner!
 	local planets = g2.search("planet -neutral")

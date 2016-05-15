@@ -7,6 +7,19 @@ function production(u)
 		return production
 end
 
+function totalShips(users)
+        		local ships = 0
+        		for i,u in pairs(users) do
+        			if(user ~= GAME.game.neutral) then
+        				ships = ships+numShips(u)
+        			end
+        		end
+        		
+        		return ships
+        	end
+        	
+
+
 
 function numShips(u)
         		return numShipsInPlanets(u)+numShipsInFleets(u)
